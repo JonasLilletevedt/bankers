@@ -1,0 +1,15 @@
+# Gradle
+.gradle/
+build/
+
+# Database
+*.db
+
+# Logs
+*.log
+
+# OS/Editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
