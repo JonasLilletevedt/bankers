@@ -8,6 +8,7 @@ import no.setup.bankers.persistence.Db;
 
 public class App {
     public static void main(String[] args) {
+        // Initiliazes 
         Db.migrate();
     }
 }
