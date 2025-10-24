@@ -1,6 +1,6 @@
 package no.setup.bankers.domain;
 
-public record Person (
+public record Owner (
     int id,
     String firstname,
     String surname,

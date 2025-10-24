@@ -1,10 +1,10 @@
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS persons (
+CREATE TABLE IF NOT EXISTS owners (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     firstname TEXT NOT NULL,
     surname TEXT NOT NULL,
-    email TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
     phone_number TEXT NOT NULL
 );
 
