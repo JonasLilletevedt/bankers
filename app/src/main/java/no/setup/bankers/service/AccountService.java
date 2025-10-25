@@ -95,7 +95,7 @@ public class AccountService implements IAccountService {
         if (accountRepo.findById(c, accountId).isEmpty()) return TxResult.ACCOUNT_NOT_FOUND;
 
         int currentBalance = transactionRepo.balanceCents(c, accountId);
-        if (amountCents > currentBalance) return TxResult.NOT_SUFFICIENT_FUNDS;
+        if (amountCents > currentBalance) return TxResult.INSUFFICIENT_FUNDS;
 
 
         transactionRepo.create(
@@ -123,7 +123,7 @@ public class AccountService implements IAccountService {
     ) {
         if (amountCents <= 0) return TxResult.AMOUNT_MUST_BE_POSITIVE;
 
-        if (fromAccountId == toAccountId) return TxResult.INVALID_SAME_ACOUNT;
+        if (fromAccountId == toAccountId) return TxResult.INVALID_SAME_ACCOUNT;
 
         boolean old = true;
 
@@ -147,7 +147,7 @@ public class AccountService implements IAccountService {
             if (amountCents > currentBalance) {
                 c.rollback();
                 c.setAutoCommit(old);
-                return TxResult.NOT_SUFFICIENT_FUNDS;
+                return TxResult.INSUFFICIENT_FUNDS;
             }
 
             transactionRepo.create(
@@ -177,8 +177,9 @@ public class AccountService implements IAccountService {
 
         } catch (Exception e) {
             try { c.rollback(); } catch (Exception ignore) {}
-            try { c.setAutoCommit(old);} catch (Exception ignore) {}
             throw new RuntimeException("transfer failed", e);
+        } finally {
+            try { c.setAutoCommit(old); } catch (Exception ignore) {}
         }
     }
 }
