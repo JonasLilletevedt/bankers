@@ -74,4 +74,15 @@ public class AccountRepo {
             rs -> mapAccount(rs)
         );
     }
+
+    public int balanceCents(Connection c, int accountId) {
+        String q = "SELECT COALESCE(SUM(amount_cents), 0) AS balance FROM transactions WHERE account_id = ?";
+
+        return sql.one(
+            c,
+            q,
+            ps -> ps.setInt(1, accountId),
+            rs -> rs.getInt("balance")
+        ).orElse(0);
+    }
 }
