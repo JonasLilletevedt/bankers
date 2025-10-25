@@ -54,4 +54,24 @@ public class OwnerRepo {
         );
     }
 
+    public Optional<Owner> findByEmail(Connection c, String email) {
+        String q = "SELECT id, firstname, surname, email, phonenumber FROM owners WHERE email = ?";
+
+        return sql.one(c, 
+        q,
+        ps -> ps.setString(1, email),
+        rs -> mapOwner(rs)
+        );
+    }
+
+    public Optional<Owner> findByPhonenumber(Connection c, String phonenumber) {
+        String q = "SELECT id, firstname, surname, email, phonenumber FROM owners WHERE phonenumber = ?";
+
+        return sql.one(c, 
+        q,
+        ps -> ps.setString(1, phonenumber),
+        rs -> mapOwner(rs)
+        );
+    }
+
 }

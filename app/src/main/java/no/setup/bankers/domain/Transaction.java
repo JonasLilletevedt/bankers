@@ -6,7 +6,7 @@ public record Transaction (
     int amountCents,
     String type,
     String category,
-    String timestamp,
+    String createdAt,
     String message
 ) {
     
