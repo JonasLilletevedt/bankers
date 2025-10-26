@@ -3,12 +3,21 @@
  */
 package no.setup.bankers;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import no.setup.bankers.http.Api;
+import no.setup.bankers.persistence.AccountRepo;
 import no.setup.bankers.persistence.Db;
+import no.setup.bankers.persistence.Sql;
+import no.setup.bankers.persistence.TransactionRepo;
+import no.setup.bankers.service.AccountService;
 
 
 public class App {
-    public static void main(String[] args) {
-        // Initiliazes 
-        Db.migrate();
+    public static void main(String[] args) throws SQLException {
+        // Init
+        Api api = new Api();
+        api.main(args);
     }
 }

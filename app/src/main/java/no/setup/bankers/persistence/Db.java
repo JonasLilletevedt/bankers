@@ -9,10 +9,12 @@ import java.sql.Statement;
 import java.util.stream.Collectors;
 
 public class Db {
-    private static final String DEFAULT_PATH = "bankers.db";
+    private final String path;
 
-    public static Connection connect() throws SQLException {
-        String dbPath = System.getenv().getOrDefault("DB_PATH", DEFAULT_PATH);
+    public Db(String path) { this.path = path; }
+
+    public Connection connect() throws SQLException {
+        String dbPath = System.getenv().getOrDefault("DB_PATH", path);
         Connection c = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
 
         try (Statement s = c.createStatement()) {
@@ -23,7 +25,7 @@ public class Db {
         return c;
     }
 
-    public static String readResource(String path) {
+    public String readResource(String path) {
         try (var data = Db.class.getResourceAsStream(path)) {
             if (data == null) {
                 throw new IllegalStateException("Resource not found: " + path);
@@ -40,7 +42,7 @@ public class Db {
 
     // TODO: replace naive SQL splitter if we add complex migrations
     // TODO: add busy timeout 
-    public static void migrate() {
+    public void migrate() {
         try (Connection c = connect(); Statement st = c.createStatement()) {
             boolean conOldSetting = c.getAutoCommit();
             c.setAutoCommit(false);
