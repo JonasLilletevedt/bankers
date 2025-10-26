@@ -17,7 +17,6 @@ import no.setup.bankers.service.AccountService;
 public class App {
     public static void main(String[] args) throws SQLException {
         // Init
-        Api api = new Api();
-        api.main(args);
+        Api.main(args);
     }
 }

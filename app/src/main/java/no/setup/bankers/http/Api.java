@@ -1,27 +1,76 @@
 package no.setup.bankers.http;
 
+import java.util.List;
+
 import io.javalin.Javalin;
 import no.setup.bankers.service.AccountService;
+import no.setup.bankers.service.OwnerService;
+import no.setup.bankers.domain.Account;
 import no.setup.bankers.persistence.AccountRepo;
 import no.setup.bankers.persistence.TransactionRepo;
 import no.setup.bankers.persistence.Db;
+import no.setup.bankers.persistence.OwnerRepo;
 import no.setup.bankers.persistence.Sql;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+
 
 public final class Api {
 
-    public static Javalin start(int port, Db db, AccountService svc) {
+    public static Javalin start(
+        int port, 
+        Db db, 
+        AccountService asvc, 
+        OwnerService osvc
+    ) {
         var app = Javalin.create(cfg -> {
             cfg.bundledPlugins.enableCors(cors -> cors.addRule(r -> r.anyHost()));
         });
+        var json = new ObjectMapper();
 
         app.get("/api/health", ctx -> ctx.result("ok"));
 
-        app.get("/api/accounts/{id}/balance", ctx -> {
-            int id = Integer.parseInt(ctx.pathParam("id"));
+        app.get("/api/accounts/{accountId}/balance", ctx -> {
+            int accountId = Integer.parseInt(ctx.pathParam("accountId"));
             try (var c = db.connect()) {
-                int bal = svc.balanceCents(c, id);
+                int bal = asvc.balanceCents(c, accountId);
                 ctx.json(bal);
             }
+        });
+
+        app.get("/api/owners/{ownerId}/accounts", ctx -> {
+            int ownerId = Integer.parseInt(ctx.pathParam("ownerId"));
+            try (var c = db.connect()) {
+                List<Account> accounts = asvc.listByOwner(c, ownerId);
+                ctx.json(accounts);
+
+            }
+        });
+
+        app.post("/api/owners", ctx -> {
+            var node = json.readTree(ctx.body());
+            String firstname = node.get(("firstname")).asText();
+            String surname = node.get(("surname")).asText();
+            String email = node.get(("email")).asText();
+            String phonenumber = node.get(("phonenumber")).asText();
+
+            // Todo() Validate input
+
+            try (var c = db.connect()) {
+                int ownerId = osvc.createOwner(
+                    c, 
+                    firstname, 
+                    surname, 
+                    email, 
+                    phonenumber
+                );
+                ctx.json(ownerId);
+            }
+        });
+
+        app.post("/api/login/email", ctx -> {
+            var node = json.readTree(ctx.body());
+            String email = node.get("email").asText();
         });
 
         app.start(port);
@@ -32,10 +81,11 @@ public final class Api {
     public static void main(String[] args) {
         var db = new Db("bankers.db");
         var sql = new Sql();
-        var svc = new AccountService(
-            new AccountRepo(sql), 
-            new TransactionRepo(sql)
-        );
-        Api.start(8080, db, svc);
+        var accRepo = new AccountRepo(sql);
+        var tranRepo = new TransactionRepo(sql);
+        var ownrRepo = new OwnerRepo(sql);
+        var asvc = new AccountService(accRepo, tranRepo);
+        var osvc = new OwnerService(accRepo, ownrRepo);
+        Api.start(8080, db, asvc, osvc);
     }
 }

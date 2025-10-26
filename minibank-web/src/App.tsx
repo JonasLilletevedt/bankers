@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { getHealth, getBalance } from "./api";
+import { getHealth, getBalance, getAccounts, type Account } from "./api";
 
 export default function App() {
   const [health, setHealth] = useState<string>("…");
   const [accountId, setAccountId] = useState<number>(1);
+  const [ownerId, setOwnerId] = useState<number>(1)
+  const [accounts, setAccounts] = useState<Account[]>([])
   const [balance, setBalance] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +23,28 @@ export default function App() {
       setError(String(e?.message ?? e));
     }
   }
+  
+  async function loadAccounts() {
+    setError(null);
+    try {
+      const listAccounts = await getAccounts(ownerId);
+      setAccounts(listAccounts);
+    } catch (e: any) {
+      setError(String(e?.message ?? e));
+    }
+  }
 
+  async function loadFrontscreen() {
+    return (
+    <div style={{ padding: 24, fontFamily: "systen-ui, sans-serif" }}>
+      <h1>Bankers</h1>
+      <div>Backend healt: <b>{health}</b></div>
+
+      <hr style={{ margin: "16px 0"}} />
+
+    </div>
+    );
+  }
   return (
     <div style={{ padding: 24, fontFamily: "system-ui, sans-serif" }}>
       <h1>MiniBank</h1>
@@ -40,6 +63,19 @@ export default function App() {
       </label>
       <button onClick={loadBalance} style={{ marginLeft: 8, padding: "4px 10px" }}>
         Load balance
+      </button>
+
+       <label>
+        Owner ID:&nbsp;
+        <input
+          type="number"
+          value={ownerId}
+          onChange={e => (Number(e.target.value))}
+          style={{ padding: 4, width: 120 }}
+        />
+      </label>
+      <button onClick={loadAccounts} style={{ marginLeft: 8, padding: "4px 10px" }}>
+        Load Accounts
       </button>
 
       <div style={{ marginTop: 12 }}>
