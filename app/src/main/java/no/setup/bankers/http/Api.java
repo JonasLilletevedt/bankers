@@ -71,6 +71,10 @@ public final class Api {
         app.post("/api/login/email", ctx -> {
             var node = json.readTree(ctx.body());
             String email = node.get("email").asText();
+
+            try (var c = db.connect()) {
+                int ownerId = osvc.getOwnerIdFromEmail(c, email);
+            }
         });
 
         app.start(port);

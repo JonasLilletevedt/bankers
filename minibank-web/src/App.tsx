@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { getHealth, getBalance, getAccounts, type Account } from "./api";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Frontscreen from "./screens/Frontscreen";
+import CreateAccount from "./screens/CreateAccount";
 
 export default function App() {
   const [health, setHealth] = useState<string>("…");
@@ -34,55 +37,12 @@ export default function App() {
     }
   }
 
-  async function loadFrontscreen() {
-    return (
-    <div style={{ padding: 24, fontFamily: "systen-ui, sans-serif" }}>
-      <h1>Bankers</h1>
-      <div>Backend healt: <b>{health}</b></div>
-
-      <hr style={{ margin: "16px 0"}} />
-
-    </div>
-    );
-  }
-  return (
-    <div style={{ padding: 24, fontFamily: "system-ui, sans-serif" }}>
-      <h1>MiniBank</h1>
-      <div>Backend health: <b>{health}</b></div>
-
-      <hr style={{ margin: "16px 0" }} />
-
-      <label>
-        Account ID:&nbsp;
-        <input
-          type="number"
-          value={accountId}
-          onChange={e => setAccountId(Number(e.target.value))}
-          style={{ padding: 4, width: 120 }}
-        />
-      </label>
-      <button onClick={loadBalance} style={{ marginLeft: 8, padding: "4px 10px" }}>
-        Load balance
-      </button>
-
-       <label>
-        Owner ID:&nbsp;
-        <input
-          type="number"
-          value={ownerId}
-          onChange={e => (Number(e.target.value))}
-          style={{ padding: 4, width: 120 }}
-        />
-      </label>
-      <button onClick={loadAccounts} style={{ marginLeft: 8, padding: "4px 10px" }}>
-        Load Accounts
-      </button>
-
-      <div style={{ marginTop: 12 }}>
-        {error ? <span style={{ color: "crimson" }}>Error: {error}</span>
-               : balance === null ? "Balance: —"
-               : <>Balance: <b>{balance}</b> (cents)</>}
-      </div>
-    </div>
+   return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Frontscreen />} />
+        <Route path="/create-account" element={<CreateAccount />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
