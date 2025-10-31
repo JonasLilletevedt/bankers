@@ -27,7 +27,7 @@ export async function getAccounts(ownerId: number): Promise<Account[]> {
   return r.json();
 }
 
-export async function createOwner(input: OwnerInput): Promise<number> {
+export async function createOwner(input: OwnerInput): Promise<any> {
   const r = await fetch("/api/owners", {
     method: "POST",
     headers: {
@@ -35,12 +35,11 @@ export async function createOwner(input: OwnerInput): Promise<number> {
     },
     body: JSON.stringify(input),
   });
+  const data = await r.json().catch(() => ({}));
   if (!r.ok) {
-    const err = await r.json().catch(() => ({}));
-    throw new Error(err.error || `HTTP ${r.status}`);
+    throw new Error("\nError type: " + data.error + "\nDetails: " + data.details);
   }
   
-  const id = await r.json();
-  return r.json();
+  return data;
 } 
 

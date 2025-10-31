@@ -5,9 +5,10 @@ import java.util.Map;
 import org.sqlite.SQLiteException;
 
 import io.javalin.http.Context;
+import no.setup.bankers.persistence.Sql.DbException;
 
 public class ErrorUtil {
-    public static void handleUniqueConstraint(Context ctx, Exception e) {
+    public static void handleSqlError(Context ctx, DbException e) {
         Throwable cause = e.getCause() != null ? e.getCause() : e;
 
         System.err.println("SQL error: " + cause.getMessage());
@@ -20,6 +21,9 @@ public class ErrorUtil {
             }
         }
 
-        ctx.status(500).json(Map.of("error", "Database error: " + cause.getMessage()));
+        ctx.status(500).json(Map.of(
+            "error", "Database error", 
+            "details", cause.getMessage())
+        );
     }
 }

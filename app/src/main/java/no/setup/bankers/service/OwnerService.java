@@ -40,7 +40,7 @@ public class OwnerService implements IOwnerService {
     @Override
     public int getOwnerIdFromEmail(Connection c, String email) {
         var res = ownerRepo.findByEmail(c, email);
-        if (!res.isPresent()) return 0;
+        if (!res.isPresent()) return -1;
         
         return res.get().id();
     }

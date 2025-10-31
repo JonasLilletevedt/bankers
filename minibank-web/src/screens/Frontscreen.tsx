@@ -17,7 +17,7 @@ const Frontscreen: React.FC = () => {
             /* TODO: handle login */
             alert("TODO: Login successful");
         } else {
-            alert("TODO: Wrong email. Please try again.\nIf you do not oawn an account, you can make one below.");
+            alert("TODO: Wrong email. Please try again.\nIf you do not own an account, you can make one below.");
         }
     }
 

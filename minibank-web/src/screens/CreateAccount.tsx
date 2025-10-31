@@ -64,14 +64,18 @@ const CreateAccount: React.FC = () => {
                     }}
                 />
                 <button
-                    onClick={async (e) => {
-                        const ownerId = createOwner({
-                            firstname: firstname,
-                            surname: surname,
-                            email: email,
-                            phonenumber: phonenumber
-                        });
-                        alert(ownerId)
+                    onClick={async () => {
+                        try { 
+                            const res = await createOwner({
+                                firstname: firstname,
+                                surname: surname,
+                                email: email,
+                                phonenumber: phonenumber
+                            }); 
+                            alert(`Owner created successfully! ID: ${res.ownerId}`);
+                        } catch (err: any) {
+                            alert(`Failed to create owner! ${err.message}`)
+                        }
                     }}>
                     Create Account
                 </button>

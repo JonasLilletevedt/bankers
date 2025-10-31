@@ -61,8 +61,14 @@ public final class Api {
                 String phonenumber = node.get("phonenumber").asText();
 
                 try (var c = db.connect()) {
-                    int ownerId = osvc.createOwner(c, firstname, surname, email, phonenumber);
-                    ctx.json(ownerId);
+                    int ownerId = osvc.createOwner(
+                        c, 
+                        firstname, 
+                        surname, 
+                        email, 
+                        phonenumber
+                    );
+                    ctx.status(201).json(Map.of("ownerId", ownerId));
                 }
             } catch (Sql.DbException e) {
                 ErrorUtil.handleSqlError(ctx, e);
@@ -75,6 +81,9 @@ public final class Api {
 
             try (var c = db.connect()) {
                 int ownerId = osvc.getOwnerIdFromEmail(c, email);
+                if (!ownerId.isPresent()) {
+                    ctx.status(500).json(Map.of("error", "No account found!"))
+                }
             }
         });
 
