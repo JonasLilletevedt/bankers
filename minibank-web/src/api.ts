@@ -35,5 +35,12 @@ export async function createOwner(input: OwnerInput): Promise<number> {
     },
     body: JSON.stringify(input),
   });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${r.status}`);
+  }
+  
+  const id = await r.json();
   return r.json();
 } 
+

@@ -1,10 +1,13 @@
 package no.setup.bankers.http;
 
+import java.sql.SQLDataException;
 import java.util.List;
+import java.util.Map;
 
 import io.javalin.Javalin;
 import no.setup.bankers.service.AccountService;
 import no.setup.bankers.service.OwnerService;
+import no.setup.bankers.util.ErrorUtil;
 import no.setup.bankers.domain.Account;
 import no.setup.bankers.persistence.AccountRepo;
 import no.setup.bankers.persistence.TransactionRepo;
@@ -23,6 +26,8 @@ public final class Api {
         AccountService asvc, 
         OwnerService osvc
     ) {
+        db.migrate();
+
         var app = Javalin.create(cfg -> {
             cfg.bundledPlugins.enableCors(cors -> cors.addRule(r -> r.anyHost()));
         });
@@ -48,23 +53,19 @@ public final class Api {
         });
 
         app.post("/api/owners", ctx -> {
-            var node = json.readTree(ctx.body());
-            String firstname = node.get(("firstname")).asText();
-            String surname = node.get(("surname")).asText();
-            String email = node.get(("email")).asText();
-            String phonenumber = node.get(("phonenumber")).asText();
+            try {
+                var node = json.readTree(ctx.body());
+                String firstname = node.get("firstname").asText();
+                String surname = node.get("surname").asText();
+                String email = node.get("email").asText();
+                String phonenumber = node.get("phonenumber").asText();
 
-            // Todo() Validate input
-
-            try (var c = db.connect()) {
-                int ownerId = osvc.createOwner(
-                    c, 
-                    firstname, 
-                    surname, 
-                    email, 
-                    phonenumber
-                );
-                ctx.json(ownerId);
+                try (var c = db.connect()) {
+                    int ownerId = osvc.createOwner(c, firstname, surname, email, phonenumber);
+                    ctx.json(ownerId);
+                }
+            } catch (Sql.DbException e) {
+                ErrorUtil.handleSqlError(ctx, e);
             }
         });
 

@@ -8,7 +8,7 @@ IF NOT EXISTS owners
     firstname TEXT NOT NULL,
     surname TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
-    phone_number TEXT NOT NULL UNIQUE
+    phonenumber TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE

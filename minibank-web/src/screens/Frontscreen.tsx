@@ -1,5 +1,6 @@
 import React, { use, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CreateAccount from "./CreateAccount";
 
 const Frontscreen: React.FC = () => {
     
