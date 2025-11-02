@@ -1,21 +1,20 @@
 package no.setup.bankers.http;
 
-import java.sql.SQLDataException;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.javalin.Javalin;
-import no.setup.bankers.service.AccountService;
-import no.setup.bankers.service.OwnerService;
-import no.setup.bankers.util.ErrorUtil;
 import no.setup.bankers.domain.Account;
 import no.setup.bankers.persistence.AccountRepo;
-import no.setup.bankers.persistence.TransactionRepo;
 import no.setup.bankers.persistence.Db;
 import no.setup.bankers.persistence.OwnerRepo;
 import no.setup.bankers.persistence.Sql;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
+import no.setup.bankers.persistence.TransactionRepo;
+import no.setup.bankers.service.AccountService;
+import no.setup.bankers.service.OwnerService;
+import no.setup.bankers.util.ErrorUtil;
 
 
 public final class Api {
@@ -48,9 +47,36 @@ public final class Api {
             try (var c = db.connect()) {
                 List<Account> accounts = asvc.listByOwner(c, ownerId);
                 ctx.json(accounts);
-
             }
         });
+
+        app.post("/api/owner/data", ctx -> {
+            try {
+                var node = json.readTree(ctx.body());
+                var ownerIdNode = node.path("ownerId"); // safer
+                if (!ownerIdNode.canConvertToInt()) {
+                    ApiResponses.badRequest(ctx, "Missing or invalid 'ownerId' in request body");
+                    return;
+                }
+                int ownerId = ownerIdNode.asInt();
+
+                try (var c = db.connect()) {
+                    var data = osvc.getOwnerFromOwnerId(c, ownerId);
+                    if (data.isEmpty()) {
+                        ApiResponses.notFound(ctx, "No owner found for id=" + ownerId);
+                        return;
+                    }
+                    ApiResponses.ok(ctx, data.get());
+                }
+            } catch (Sql.DbException e) {
+                ErrorUtil.handleSqlError(ctx, e);
+            } catch (Exception e) {
+                // catch JSON / NPE / whatever
+                e.printStackTrace();
+                ApiResponses.serverError(ctx, "Unexpected server error: " + e.getMessage());
+            }
+        });
+
 
         app.post("/api/owners", ctx -> {
             try {
@@ -77,13 +103,26 @@ public final class Api {
 
         app.post("/api/login/email", ctx -> {
             var node = json.readTree(ctx.body());
-            String email = node.get("email").asText();
+            String email = node.get("email").asText(null);
+
+            if (email == null || email.isBlank()) {
+                ApiResponses.fieldError(
+                    ctx, 
+                    "email", 
+                    "Missing email"
+                );
+                return;
+            }
 
             try (var c = db.connect()) {
                 int ownerId = osvc.getOwnerIdFromEmail(c, email);
-                if (!ownerId.isPresent()) {
-                    ctx.status(500).json(Map.of("error", "No account found!"))
+                if (ownerId <= 0) {
+                    ApiResponses.notFound(ctx, "No account found for that email");
+                    return;
                 }
+                ApiResponses.ok(ctx, Map.of("ownerId", ownerId));
+            } catch (Sql.DbException e) {
+                ErrorUtil.handleSqlError(ctx, e);
             }
         });
 

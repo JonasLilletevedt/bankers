@@ -1,6 +1,7 @@
 package no.setup.bankers.service;
 
 import java.sql.Connection;
+import java.util.Optional;
 
 import no.setup.bankers.domain.Owner;
 import no.setup.bankers.persistence.AccountRepo;
@@ -43,6 +44,11 @@ public class OwnerService implements IOwnerService {
         if (!res.isPresent()) return -1;
         
         return res.get().id();
+    }
+
+    @Override
+    public Optional<Owner> getOwnerFromOwnerId(Connection c, int ownerId) {
+        return ownerRepo.findById(c, ownerId);
     }
     
 }

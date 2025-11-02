@@ -1,6 +1,7 @@
 import React, { use, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateAccount from "./CreateAccount";
+import { loginOwnerWithEmail } from "../api";
 
 const Frontscreen: React.FC = () => {
     
@@ -8,16 +9,16 @@ const Frontscreen: React.FC = () => {
     const [message, setMessage] = useState("")
     const navigate = useNavigate();
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (email === "") {
             setMessage("Enter email");
             return;
         }
-        if (email === "test@bankers.com") {
-            /* TODO: handle login */
-            alert("TODO: Login successful");
-        } else {
-            alert("TODO: Wrong email. Please try again.\nIf you do not own an account, you can make one below.");
+        try {
+            const ownerId = await loginOwnerWithEmail(email);
+            navigate(`/owner/${ownerId}`);
+        } catch (err: any) {
+            alert(err.message);
         }
     }
 

@@ -1,29 +1,34 @@
 package no.setup.bankers.util;
-
-import java.util.Map;
-
-import org.sqlite.SQLiteException;
+import java.sql.SQLException;
 
 import io.javalin.http.Context;
-import no.setup.bankers.persistence.Sql.DbException;
+import no.setup.bankers.http.ApiResponses;
+import no.setup.bankers.persistence.Sql;
 
-public class ErrorUtil {
-    public static void handleSqlError(Context ctx, DbException e) {
-        Throwable cause = e.getCause() != null ? e.getCause() : e;
+public final class ErrorUtil {
 
-        System.err.println("SQL error: " + cause.getMessage());
+    private ErrorUtil() {}
 
-        if (cause instanceof SQLiteException se) {
-            String msg = se.getMessage();
-            if (msg != null && msg.contains("UNIQUE constraing failed")) {
-                ctx.status(409).json(Map.of("error", msg));
+    public static void handleSqlError(Context ctx, Sql.DbException e) {
+        Throwable cause = e.getCause();
+
+        if (cause instanceof SQLException sqlEx) {
+            String state = sqlEx.getSQLState();
+            // You can branch on state if you want:
+            if (state != null && state.startsWith("23")) {
+                // constraint violation, unique, FK, etc.
+                ApiResponses.badRequest(ctx, "Database constraint violated");
                 return;
             }
+            // fallthrough -> generic DB error
+            ApiResponses.serverError(ctx, "Database error: " + sqlEx.getMessage());
+            return;
         }
 
-        ctx.status(500).json(Map.of(
-            "error", "Database error", 
-            "details", cause.getMessage())
-        );
+        ApiResponses.serverError(ctx, "Database error: " + e.getMessage());
+    }
+
+    public static void handleUnexpected(Context ctx, Exception e) {
+        ApiResponses.serverError(ctx, "Unexpected error: " + e.getMessage());
     }
 }

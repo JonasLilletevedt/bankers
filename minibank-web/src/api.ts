@@ -5,6 +5,15 @@ export type Account = {
   createdAt: string
 }
 
+export interface Owner {
+  ownerId: number,
+  firstname: string,
+  surname: string,
+  email: string,
+  phonenumber: string,
+  createdAt: string
+}
+
 export interface OwnerInput {
   firstname: string,
   surname: string,
@@ -16,6 +25,44 @@ export async function getHealth(): Promise<string> {
   const r = await fetch('/api/health');
   return r.text();
 }
+
+export async function loginOwnerWithEmail(email: string): Promise<number> {
+  const r = await fetch('/api/login/email', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    throw new Error("\nError type: " + data.type + "\nDetails: " + data.details);
+  }
+  return data.data.ownerId;
+}
+
+export async function getOwnerFromOwnerId(ownerId: number): Promise<any> {
+  const r = await fetch('/api/owner/data', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ "ownerId": ownerId })
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    throw new Error("\nError type: " + data.type + "\nDetails: " + data.details);
+  }
+  return new Owner(
+    data.data.ownerId,
+    data.data.firstname,
+    data.data.surname,
+    data.data.email,
+    data.data.phonenumber,
+    data.data.createdAt
+  );
+}
+
 
 export async function getBalance(accountId: number): Promise<number> {
   const r = await fetch(`/api/accounts/${accountId}/balance`);

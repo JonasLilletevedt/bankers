@@ -3,6 +3,7 @@ import { getHealth, getBalance, getAccounts, type Account } from "./api";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Frontscreen from "./screens/Frontscreen";
 import CreateAccount from "./screens/CreateAccount";
+import OwnerScreen from "./screens/OwnerScreen";
 
 export default function App() {
   const [health, setHealth] = useState<string>("…");
@@ -42,6 +43,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Frontscreen />} />
         <Route path="/create-account" element={<CreateAccount />} />
+        <Route path="/owner/:ownerId" element={<OwnerScreen />} />
       </Routes>
     </BrowserRouter>
   );
