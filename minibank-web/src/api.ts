@@ -5,6 +5,12 @@ export type Account = {
   createdAt: string
 }
 
+export type VisibleAccountDetails = {
+  iban: string,
+  balance: number,
+  createdAt: string
+}
+
 export interface Owner {
   ownerId: number,
   firstname: string,
@@ -26,6 +32,7 @@ export async function getHealth(): Promise<string> {
   return r.text();
 }
 
+
 export async function loginOwnerWithEmail(email: string): Promise<number> {
   const r = await fetch('/api/login/email', {
     method: "POST",
@@ -41,7 +48,7 @@ export async function loginOwnerWithEmail(email: string): Promise<number> {
   return data.data.ownerId;
 }
 
-export async function getOwnerFromOwnerId(ownerId: number): Promise<any> {
+export async function getOwnerFromOwnerId(ownerId: number): Promise<Owner> {
   const r = await fetch('/api/owner/data', {
     method: "POST",
     headers: {
@@ -53,14 +60,14 @@ export async function getOwnerFromOwnerId(ownerId: number): Promise<any> {
   if (!r.ok) {
     throw new Error("\nError type: " + data.type + "\nDetails: " + data.details);
   }
-  return new Owner(
-    data.data.ownerId,
-    data.data.firstname,
-    data.data.surname,
-    data.data.email,
-    data.data.phonenumber,
-    data.data.createdAt
-  );
+  return {
+    ownerId: data.data.ownerId,
+    firstname: data.data.firstname,
+    surname: data.data.surname,
+    email: data.data.email,
+    phonenumber: data.data.phonenumber,
+    createdAt: data.data.createdAt
+  };
 }
 
 

@@ -86,6 +86,8 @@ public final class Api {
                 String email = node.get("email").asText();
                 String phonenumber = node.get("phonenumber").asText();
 
+
+
                 try (var c = db.connect()) {
                     int ownerId = osvc.createOwner(
                         c, 

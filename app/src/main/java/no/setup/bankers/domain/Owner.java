@@ -5,6 +5,6 @@ public record Owner (
     String firstname,
     String surname,
     String email,
-    String phoneNumber
+    String phonenumber
 ) {
 }
